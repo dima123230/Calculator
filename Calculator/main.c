@@ -25,7 +25,7 @@ int main(void)
 	puts("1. + (adds the first number to the second)");
 	puts("2. - (subtracts the second number from the first)");
 	puts("3. * (multiplies the first number by the second)");
-	puts("4. / (divides the first number by the second");
+	puts("4. / (divides the first number by the second)");
 	puts("5. ^ (raises the first number to the power of the second)");
 	puts("6. ! (Finds the factorial of a number)");
 	puts("7. v (uses a code branch with vector operations: (+),(-),(*).)");
@@ -34,7 +34,6 @@ int main(void)
 	long long int j, res = 1;  // Переменные целых чисел для операции "факториал числа !".
 	double a, b;      // Переменные вещественных чисел для операций: "плюс, минус, деление и умножение".
 	double* A, * B;  // Переменные для операций с векторами.
-	double resv;
 	char c, r;       // Переменные для символов, первая для выбора операции, вторая для повторения работы калькулятора.
 	char op;         // Операция с векторами.
 	int size;
@@ -63,21 +62,21 @@ int main(void)
 				printf("\n");
 				break;
 			case '-': // Операция вычитания с векторами.
-				printf("Вычитание векторов: ");
+				printf("Subtracting vectors: ");
 				for (int i = 0; i < size; i++) printf("%lf ", A[i] - B[i]);
 				printf("\n");
 				break;
 			case '*': // Операция скалярного произведения с векторами.
-				printf("Скалярное произведение векторов: ");
+				printf("Scalar product of vectors: ");
 				for (int i = 0; i < size; i++) printf("%lf ", A[i] * B[i]);
 				printf("\n");
 				break;
 			default: // В случае неверной выбранной операции.
-				printf("Неправильно выбрана операция!");
+				printf("unknown operation!");
 			}
+			break;
 			free(A); // Освобождение использованной памяти.
 			free(B);
-			break;
 		case '+': // Операция сложения двух чисел.
 			printf("Enter the first number:");
 			scanf("%lf", &a);
