@@ -1,0 +1,2 @@
+Scalar product of vectors: ( 2.000000 1.000000 5.000000 ) * ( 6.000000 7.000000 8.000000 ) = ( 12.000000 7.000000 40.000000 )
+do you want to repeat one of the operations? (y/n):
