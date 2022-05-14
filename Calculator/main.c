@@ -44,8 +44,8 @@ int main(void)
 		{
 		case 'v': // Операции с векторами.
 			fscanf(input, "%i", &size);
-			A = malloc(size * sizeof(int));
-			B = malloc(size * sizeof(int));
+			A = malloc(size * sizeof(double));
+			B = malloc(size * sizeof(double));
 			for (int i = 0; i < size; i++) fscanf(input, "%lf", &A[i]);
 			for (int i = 0; i < size; i++) fscanf(input, "%lf", &B[i]);
 			fscanf(input, " %c", &op);
@@ -92,7 +92,7 @@ int main(void)
 				for (int i = 0; i < size; i++) fprintf(output, "%lf ", A[i] * B[i]);
 				fprintf(output, ")");
 				fprintf(output, "\n");
-			break;
+				break;
 			default: 
 				fprintf(output, "unknown operation!\n");  // В случае неверной выбранной операции.
 				free(A); // Освобождение использованной памяти.
