@@ -46,8 +46,8 @@ int main(void)
 		case 'v': // Операции с векторами.
 			printf("Enter the size of the vectors: ");
 			scanf("%i", &size);
-			A = malloc(size * sizeof(int));
-			B = malloc(size * sizeof(int));
+			A = malloc(size * sizeof(double));
+			B = malloc(size * sizeof(double));
 			printf("Enter the coordinates of the first vector: ");
 			for (int i = 0; i < size; i++) scanf("%lf", &A[i]);
 			printf("Enter the coordinates of the second vector: ");
@@ -72,10 +72,11 @@ int main(void)
 				printf("\n");
 				break;
 			default: // В случае неверной выбранной операции.
-			printf("unknown operation!");
-			free(A); // Освобождение использованной памяти.
-			free(B);
+				printf("unknown operation!");
+				free(A); // Освобождение использованной памяти.
+				free(B);
 			}
+			break;
 		case '+': // Операция сложения двух чисел.
 			printf("Enter the first number:");
 			scanf("%lf", &a);
