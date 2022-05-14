@@ -99,12 +99,11 @@ int main(void)
 				fprintf(output, "\n");
 				break;
 			default: // В случае неверной выбранной операции.
-				fprintf(output,"unknown operation!\n");
-			}
-			break;
+			fprintf(output,"unknown operation!\n");
 			free(A); // Освобождение использованной памяти.
 			free(B);
 			free(C);
+			}
 		case '+': // Операция сложения двух чисел.
 			fscanf(input,"%lf", &a);
 			fscanf(input,"%lf", &b);
