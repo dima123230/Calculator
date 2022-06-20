@@ -12,143 +12,280 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
+#include <locale.h>
 
 
-int main(void)
+ //структура элементов списка
+typedef struct listElem {
+	long long int f; // Переменная для ответа факториала
+	char* g; // Переменная для сообщения об ошибке или неправильном вводе
+	char op, type; // Переменные для операций и типа операндов
+	float  x, y, r, Size; // Переменные для данных и результата операций
+	float* value1, * value2, * res; // Переменные для чисел и результата векторных операций
+	struct listElem* nextElem;
+} lElem;
 
+
+// Для работы со списком
+typedef struct list
 {
-	puts("Welcome to calculator!"); // Информация о калькуляторе и про его возможные операции.
-	puts("all possible operations on this calculator are provided here:");
-	puts("1. + (adds the first number to the second)");
-	puts("2. - (subtracts the second number from the first)");
-	puts("3. * (multiplies the first number by the second)");
-	puts("4. / (divides the first number by the second)");
-	puts("5. ^ (raises the first number to the power of the second)");
-	puts("6. ! (Finds the factorial of a number)");
-	puts("7. v (uses a code branch with vector operations: (+),(-),(*).)");
+	lElem* head;
+	lElem* current;
+} list;
 
-	long int f, g;    // Переменные целых чисел для операции "возведение в степень ^".
-	long long int j, res = 1;  // Переменные целых чисел для операции "факториал числа !".
-	double a, b;      // Переменные вещественных чисел для операций: "плюс, минус, деление и умножение".
-	double* A, * B;  // Переменные для операций с векторами.
-	char c, r;       // Переменные для символов, первая для выбора операции, вторая для повторения работы калькулятора.
-	char op;         // Операция с векторами.
-	int size;        // Для размера векторов.
-	FILE* input, * output; // для ввода-вывода из файлов.
-	input = fopen("input.txt", "r");
-	output = fopen("output.txt", "w");
-	do  // Цикл если пользователь захочет продолжить работу с программой.
+
+// Функция для следующего элемента
+lElem* nextElem(list* in_This_List)
+{
+	lElem* next = in_This_List->current->nextElem;
+	in_This_List->current = next;
+	return next;
+}
+
+
+int To_Head_Elem(list* in_This_List)
+{
+	in_This_List->current = in_This_List->head;
+	return 0;
+}
+
+
+// Функция для того, чтобы добавить новый элемент в списке
+int Applist(list* to_This_List, lElem* newElem)
+{
+	if (to_This_List->head == NULL)
 	{
-		fscanf(input, " %c", &c); // Выбор одной из операций.
-		switch (c)
+		to_This_List->head = newElem;
+		to_This_List->current = newElem;
+		return 0;
+	}
+	to_This_List->current->nextElem = newElem;
+	to_This_List->current = newElem;
+	return 0;
+}
+
+
+// Функция для удаления элемента
+int deleteElem(list* in_This_List)
+{
+	lElem* del = in_This_List->current;
+	if (del == in_This_List->head)
+	{
+		in_This_List->head = del->nextElem;
+		nextElem(in_This_List);
+	}
+	else
+	{
+		To_Head_Elem(in_This_List);
+		while (in_This_List->current->nextElem != del) nextElem(in_This_List);
+		in_This_List->current->nextElem = del->nextElem;
+		if (del->nextElem != NULL) in_This_List->current = del->nextElem;
+	}
+	free(del);
+	return 0;
+}
+
+
+// Функция принимает целое число и возвращает результат его факториала
+long long int fact(int a)
+{
+	if (a == 0) return 1; // Создаем условие, в котором факториал нуля будет = 1
+	else
+	{
+		long long int fact = 1;
+		for (int i = 1; i <= a; i++)
 		{
-		case 'v': // Операции с векторами.
-			fscanf(input, "%i", &size);
-			A = malloc(size * sizeof(double));
-			B = malloc(size * sizeof(double));
-			for (int i = 0; i < size; i++) fscanf(input, "%lf", &A[i]);
-			for (int i = 0; i < size; i++) fscanf(input, "%lf", &B[i]);
-			fscanf(input, " %c", &op);
-			switch (op)
-			{
-			case '+': // Операция сложения с векторами.
-				fprintf(output, "Addition of vectors: ");
-				fprintf(output, "( ");
-				for (int i = 0; i < size; i++) fprintf(output, "%lf ", A[i]);
-				fprintf(output, ") ");
-				fprintf(output, "+ ( ");
-				for (int i = 0; i < size; i++) fprintf(output, "%lf ", B[i]);
-				fprintf(output, ")");
-				fprintf(output, " = ");
-				fprintf(output, "( ");
-				for (int i = 0; i < size; i++) fprintf(output, "%lf ", A[i] + B[i]);
-				fprintf(output, ")");
-				fprintf(output, "\n");
-				break;
-			case '-': // Операция вычитания с векторами.
-				fprintf(output, "Subtracting vectors: ");
-				fprintf(output, "( ");
-				for (int i = 0; i < size; i++) fprintf(output, "%lf ", A[i]);
-				fprintf(output, ") ");
-				fprintf(output, "- ( ");
-				for (int i = 0; i < size; i++) fprintf(output, "%lf ", B[i]);
-				fprintf(output, ")");
-				fprintf(output, " = ");
-				fprintf(output, "( ");
-				for (int i = 0; i < size; i++) fprintf(output, "%lf ", A[i] - B[i]);
-				fprintf(output, ")");
-				fprintf(output, "\n");
-				break;
-			case '*': // Операция скалярного произведения с векторами.
-				fprintf(output, "Scalar product of vectors: ");
-				fprintf(output, "( ");
-				for (int i = 0; i < size; i++) fprintf(output, "%lf ", A[i]);
-				fprintf(output, ") ");
-				fprintf(output, "* ( ");
-				for (int i = 0; i < size; i++) fprintf(output, "%lf ", B[i]);
-				fprintf(output, ")");
-				fprintf(output, " = ");
-				fprintf(output, "( ");
-				for (int i = 0; i < size; i++) fprintf(output, "%lf ", A[i] * B[i]);
-				fprintf(output, ")");
-				fprintf(output, "\n");
-				break;
-			default: 
-				fprintf(output, "unknown operation!\n");  // В случае неверной выбранной операции.
-				free(A); // Освобождение использованной памяти.
-				free(B);
-			}
-			break;
-		case '+': // Операция сложения двух чисел.
-			fscanf(input, "%lf", &a);
-			fscanf(input, "%lf", &b);
-			fprintf(output, "%lf+%lf=%lf\n", a, b, a + b); // Вывод результата сложения.
-			break;
-		case '-': // Операция вычитания.
-			fscanf(input, "%lf", &a);
-			fscanf(input, "%lf", &b);
-			fprintf(output, "%lf-%lf=%lf\n", a, b, a - b); // Вывод результата вычитания.
-			break;
-		case '*': // Операция умножения.
-			fscanf(input, "%lf", &a);
-			fscanf(input, "%lf", &b);
-			fprintf(output, "%lf*%lf=%lf\n", a, b, a * b); // Вывод результата умножения.
-			break;
-		case '/': // Операция деления.
-			fscanf(input, "%lf", &a);
-			fscanf(input, "%lf", &b);
-			fprintf(output, "%lf/%lf=%lf\n", a, b, a / b); // Вывод результата деления.
-			break;
-		case '^': // Операция возведения целого числа в степень.
-			fscanf(input, "%li", &f);
-			fscanf(input, "%li", &g);
-			long int d = 1;
-			for (int i = 0; i < g; i++)
-			{
-				d = d * f;
-			}
-			fprintf(output, "%li^%li=%li\n", f, g, d); // Вывод результата возведения в степень числа.
-			break;
-		case '!': // Операция нахождения факториала целого числа.
-			fscanf(input, "%llu", &j);
-			for (int i = 1; i <= j; i++)
-			{
-				res = res * i;
-			}
-			if (j == 0) fprintf(output, "%lli!=1\n", j); // Условие, если факториал равен 0.
-			else if (j < 0)   // Условие если пользователь пытается найти факториал отрицательного числа.
-			{
-				fprintf(output, "the factorial exists only for positive numbers\n");
-			}
-			else fprintf(output, "%lli!=%lli\n", j, res); // Вывод результата факториала числа.
-			break;
-		default:
-			fprintf(output, "unknown operation\n"); // Вывод "неизвестная операция", если пользователь ввел недопустимую операцию
+			fact *= i;
 		}
-		fprintf(output, "do you want to repeat one of the operations? (y/n):\n");
-		fscanf(input, " %c", &r);  // Желает ли пользователь повторить любую из операций
-	} while (r == 'y');
-	fclose(input);
-	fclose(output);
+		return fact;
+	}
+}
+
+
+// Функция возводит число x в степень y
+double degree(float x, float y)
+{
+	if (y == 0) return 1; // Условие, в котором число в нулевой степени будет = 1
+	else
+	{
+		float deg = x;
+		for (int i = 1; i < y; i++)
+		{
+			deg *= x;
+		}
+		return deg;
+	}
+}
+
+
+// Функция для векторного выражения
+void CalcforVectors(char op, lElem* t)
+{
+	// Проверка на целое число fSize = 1
+	int wSize = t->Size;
+	float fSize = t->Size / wSize;
+	if (fSize != 1) t->g = "Число должно быть целым!";
+
+	int vectorSize = t->Size;
+
+	t->res = calloc(vectorSize, sizeof(float));
+	switch (op)
+	{
+	case '+':
+		for (int i = 0; i < vectorSize; i++) t->res[i] = t->value1[i] + t->value2[i];
+		break;
+	case '-':
+		for (int i = 0; i < vectorSize; i++) t->res[i] = t->value1[i] - t->value2[i];
+		break;
+	case '^':
+		t->r = 0;
+		for (int i = 0; i < vectorSize; i++) t->r += t->value1[i] * t->value2[i];
+		break;
+	default:
+		t->g = "Недопустимая операция!";
+	}
+}
+
+
+
+// Функция для арифметического выражения
+void Arithm(char op, lElem* t)
+{
+	int wA = t->x;
+	float fA = t->x / wA;
+
+	int wB = t->y; // Проверка на целое число
+	float fB = t->y / wB;
+
+	switch (op)
+	{
+	case '+':
+		t->r = t->x + t->y;
+		break;
+	case '-':
+		t->r = t->x - t->y;
+		break;
+	case '*':
+		t->r = t->x * t->y;
+		break;
+	case '/':
+		if (t->y == 0) t->g = "Делить на ноль нельзя!";
+		else t->r = t->x / t->y;
+		break;
+	case '!':
+		if ((fA != 1) || (t->x < 0)) t->g = "Под знаком факториала должно быть целое число!";
+		else t->f = fact(t->x);
+		break;
+	case '^':
+		if ((fB != 1) || (t->y < 0)) t->g = "Степень должна быть целым числом!";
+		else t->r = degree(t->x, t->y);
+		break;
+	default:
+		t->g = "Недопустимая операция!";
+	}
+}
+
+// Функция для того, чтобы печатать массив чисел как сказано в задании
+void ForPrintVect(float* vect, int size, FILE* output)
+{
+	fprintf(output, "(");
+	for (int i = 0; i < (size - 1); i++) fprintf(output, "%g, ", vect[i]);
+	fprintf(output, "%g)", vect[size - 1]);
+	free(vect);
+}
+
+
+int main()
+{
+	setlocale(LC_ALL, "Russian"); // Для русских символов ( особенность Visual Studio ), также добавлена соответсвующая библиотека locale.h
+	while (1) // Цикл для постоянного запуска
+	{
+		char choice, op, type; // Переменные для продолжения, операции и типа операндов
+		char nameinput[255]; // Переменная для названия файла
+		char nameoutput[255]; // Переменная для названия файла
+		float Num; // Переменная для числа
+		printf("Введите имя входного файла: ");
+		scanf("%s", &nameinput);
+		printf("Введите имя выходного файла: ");
+		scanf("%s", &nameoutput);
+
+		// Список для входных данных
+		list* tasks = calloc(1, sizeof(list));
+		FILE* input = fopen(nameinput, "r");
+
+		while (fscanf(input, " %c %c %f", &op, &type, &Num) != EOF) // Построчное чтение файла
+		{
+			lElem* newT = calloc(1, sizeof(lElem));
+			newT->op = op;
+			newT->type = type;
+			newT->g = NULL;
+			if (type == 'v')
+			{
+				newT->Size = Num;
+				newT->value1 = malloc(Num * sizeof(float));
+				newT->value2 = malloc(Num * sizeof(float));
+				for (int i = 0; i < Num; i++) fscanf(input, "%f", &newT->value1[i]);
+				for (int i = 0; i < Num; i++) fscanf(input, "%f", &newT->value2[i]);
+			}
+			else if (type == 's')
+			{
+				newT->x = Num;
+				if (op != '!') fscanf(input, "%f", &newT->y);
+			}
+			else fgets(nameinput, 100, input); // Удаление оставшейся строки
+			Applist(tasks, newT);
+		}
+		fclose(input); // Закрытие файла после чтения
+
+		To_Head_Elem(tasks);
+
+		while (tasks->current != NULL) // Пока не будет конец списка
+		{
+			if (tasks->current->type == 'v') CalcforVectors(tasks->current->op, tasks->current);
+			else if (tasks->current->type == 's') Arithm(tasks->current->op, tasks->current);
+			else
+			{
+				tasks->current->g = "Неизвестный тип данных!";
+			}
+			nextElem(tasks);
+		}
+
+		To_Head_Elem(tasks);
+
+		FILE* output = fopen(nameoutput, "w");
+
+		while (tasks->current != NULL) // Пока не будет конец списка
+		{
+			lElem* T = tasks->current;
+			if (T->g != NULL)
+			{
+				fprintf(output, "%s\n", T->g);
+				deleteElem(tasks);
+				continue;
+			}
+
+			if (T->type == 's')
+			{
+				if (T->op != '!') fprintf(output, "%g %c %g = %g", T->x, T->op, T->y, T->r);
+				else fprintf(output, "%g! = %lli", T->x, T->f);
+			}
+			else if (T->type == 'v')
+			{
+				ForPrintVect(T->value1, T->Size, output);
+				fprintf(output, " %c ", T->op);
+				ForPrintVect(T->value2, T->Size, output);
+				fprintf(output, " = ");
+				if (T->op != '^') ForPrintVect(T->res, T->Size, output);
+				else fprintf(output, "%g", T->r);
+			}
+			fprintf(output, "\n");
+			deleteElem(tasks);
+		}
+		fclose(output); // закрытие файла
+		free(tasks); // Освобождение памяти
+		printf("Хотите продолжить? (y/n) \n"); // Желает ли пользователь продолжить
+		scanf(" %c", &choice);
+		if (choice == 'n') break;
+	}
 	return 0;
 }
