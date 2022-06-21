@@ -5,7 +5,7 @@
  Version     :
  Copyright   : Your copyright notice
  Description : Calculator with 6 operations with real numbers: (+),(-),(*),(/),(^),(!)
-			   and 3 operations with vectors (+),(-),(*).
+			   and 3 operations with vectors (+),(-),(*). Calculator with stack.
  ============================================================================
  */
 
@@ -20,7 +20,7 @@ typedef struct queueElem {
 	long long int f; // Переменная для ответа факториала
 	char* g; // Переменная для сообщения об ошибке или неправильном вводе
 	char op, type; // Переменные для операций и типа операндов
-	float  x, y, r, Size; // Переменные для данных и результата операций
+	float  a, b, r, Size; // Переменные для данных и результата операций
 	float* value1, * value2, * res; // Переменные для чисел и результата векторных операций
 	struct queueElem* nextElem;
 } queueElem;
@@ -34,14 +34,6 @@ typedef struct queue
 } queue;
 
 
-//функция для получения лемента из головы очереди
-queueElem* getElem(queue* from_This_Queue)
-{
-	queueElem* ret = from_This_Queue->head;
-	from_This_Queue->head = from_This_Queue->head->nextElem;
-	return ret;
-}
-
 //функция для добавления нового элемента
 void putElem(queue* to_This_Queue, queueElem* newItem)
 {
@@ -51,26 +43,58 @@ void putElem(queue* to_This_Queue, queueElem* newItem)
 }
 
 
-// Функция возводит число x в степень y
-double degree(float x, float y)
+//функция для получения лемента из головы очереди
+queueElem* getElem(queue* from_This_Queue)
 {
-	if (y == 0) return 1; // Условие, в котором число в нулевой степени будет = 1
+	queueElem* ret = from_This_Queue->head;
+	from_This_Queue->head = from_This_Queue->head->nextElem;
+	return ret;
+}
+
+
+typedef struct stackElem
+{
+	float nD;
+	struct sElem* next;
+} stackElem;
+
+typedef struct stack
+{
+	stackElem* head;
+} stack;
+
+void sPutElem(stack* s, stackElem* e)
+{
+	e->next = s->head;
+	s->head = e;
+}
+
+stackElem* sGetElem(stack* s)
+{
+	stackElem* ret = s->head;
+	s->head = s->head->next;
+	return ret;
+}
+
+//Возводит а в степень b
+double degree(float a, float b)
+{
+	if (b == 0) return 1; // Создаем условие в котором число в нулевой степени будет = 1
 	else
 	{
-		float deg = x;
-		for (int i = 1; i < y; i++)
+		float deg = a;
+		for (int i = 1; i < b; i++)
 		{
-			deg *= x;
+			deg *= a;
 		}
 		return deg;
 	}
 }
 
-
-// Функция принимает целое число и возвращает результат его факториала
+// Функция принимает целое число и возвращает его факториал
 long long int fact(int a)
 {
-	if (a == 0) return 1; // Создаем условие, в котором факториал нуля будет = 1
+	if (a == 0) return 1; // Создаем условие в котором факториал нуля = 1
 	else
 	{
 		long long int fact = 1;
@@ -83,171 +107,269 @@ long long int fact(int a)
 }
 
 
-// Функция для векторного выражения
-void CalcforVectors(char op, queueElem* t)
+// Функция для обработки векторного выражения
+void CalcForVectors(char op, queueElem* task)
 {
-	// Проверка на целое число fSize = 1
-	int wSize = t->Size;
-	float fSize = t->Size / wSize;
-	if (fSize != 1) t->g = "Число должно быть целым!";
-	int vSize = t->Size;
-	t->res = calloc(vSize, sizeof(float));
+	// Проверка на целостность числа
+	int wSize = task->Size;
+	float fSize = task->Size / wSize;
+	if (fSize != 1) task->g = "Число должно быть целым!";
+
+	int vectorSize = task->Size;
+
+	task->res = calloc(vectorSize, sizeof(float));
 	switch (op)
 	{
 	case '+':
-		for (int i = 0; i < vSize; i++) t->res[i] = t->value1[i] + t->value2[i];
+		for (int i = 0; i < vectorSize; i++) task->res[i] = task->value1[i] + task->value2[i];
 		break;
 	case '-':
-		for (int i = 0; i < vSize; i++) t->res[i] = t->value1[i] - t->value2[i];
+		for (int i = 0; i < vectorSize; i++) task->res[i] = task->value1[i] - task->value2[i];
 		break;
 	case '^':
-		t->r = 0;
-		for (int i = 0; i < vSize; i++) t->r += t->value1[i] * t->value2[i];
+		task->r = 0;
+		for (int i = 0; i < vectorSize; i++) task->r += task->value1[i] * task->value2[i];
 		break;
 	default:
-		t->g = "Недопустимая операция!";
+		task->g = "Недопустимая операция!";
 	}
 }
 
 
-
-// Функция для арифметического выражения
-void Arithm(char op, queueElem* t)
+// Функция для обработки арифметического выражения
+void Arithm(char op, queueElem* task)
 {
-	int wA = t->x;
-	float fA = t->x / wA;
-
-	int wB = t->y; // Проверка на целое число
-	float fB = t->y / wB;
+	int wA = task->a; 
+	float fA = task->a / wA; 
+	int wB = task->b; 
+	float fB = task->b / wB;
 
 	switch (op)
 	{
 	case '+':
-		t->r = t->x + t->y;
+		task->r = task->a + task->b;
 		break;
 	case '-':
-		t->r = t->x - t->y;
+		task->r = task->a - task->b;
 		break;
 	case '*':
-		t->r = t->x * t->y;
+		task->r = task->a * task->b;
 		break;
 	case '/':
-		if (t->y == 0) t->g = "Делить на ноль нельзя!";
-		else t->r = t->x / t->y;
+		if (task->b == 0) task->g = "Делить на ноль нельзя!";
+		else task->r = task->a / task->b;
 		break;
 	case '!':
-		if ((fA != 1) || (t->x < 0)) t->g = "Под знаком факториала должно быть целое число!";
-		else t->f = fact(t->x);
+		if ((fA != 1) || (task->a < 0)) task->g = "Под знаком факториала должно стоять целое число|!";
+		else task->f = fact(task->a);
 		break;
 	case '^':
-		if ((fB != 1) || (t->y < 0)) t->g = "Степень должна быть целым числом!";
-		else t->r = degree(t->x, t->y);
+		if ((fB != 1) || (task->b < 0)) task->g = "Степень должна быть целым числом!";
+		else task->r = degree(task->a, task->b);
 		break;
 	default:
-		t->g = "Недопустимая операция!";
+		task->g = "Недопустимая операция!";
 	}
 }
 
-// Функция для того, чтобы печатать массив чисел как сказано в задании ( используется в векторном выражении )
-void ForPrintVect(float* vect, int size, FILE* output)
+// Функция для обработки в обратной польской нотации
+void pNotation(char* str, queueElem* o)
+{
+	stack* stk = calloc(1, sizeof(stack));
+	int pCharIsNum = 0; 
+
+	for (int i = 0; str[i] != '\0'; i++) // Пока не будет конец строки
+	{
+		float aC = str[i]; 
+		if ((aC - 48 < 10) & (aC - 48 >= 0))
+		{
+			
+			if (pCharIsNum > 0) stk->head->nD = stk->head->nD * 10 + (aC - 48);
+			else if (pCharIsNum < 0)
+			{
+				stk->head->nD = stk->head->nD + (aC - 48) / (degree(10, pCharIsNum * (-1)));
+				pCharIsNum -= 1;
+			}
+			else // Добавление нового числа в стек
+			{
+				stackElem* new = calloc(1, sizeof(stackElem));
+				new->nD = aC - 48;
+				pCharIsNum = 1;
+				sPutElem(stk, new);
+			}
+		}
+		else //если имеем дело с символом
+		{
+			stackElem* new = calloc(1, sizeof(stackElem));
+			switch (str[i])
+			{
+			case '.': 
+				if (pCharIsNum > 0) pCharIsNum = -1;
+				break;
+			case '+': 
+				new->nD = sGetElem(stk)->nD + sGetElem(stk)->nD;
+				sPutElem(stk, new);
+				break;
+			case '-':
+				new->nD = (sGetElem(stk)->nD - sGetElem(stk)->nD) * (-1);
+				sPutElem(stk, new);
+				break;
+			case '*':
+				new->nD = sGetElem(stk)->nD * sGetElem(stk)->nD;
+				sPutElem(stk, new);
+				break;
+			case '/':;
+				float second = sGetElem(stk)->nD;
+				new->nD = sGetElem(stk)->nD / second;
+				sPutElem(stk, new);
+				break;
+			case '!':
+				new->nD = fact(sGetElem(stk)->nD);
+				sPutElem(stk, new);
+				break;
+			case '^':;
+				float dSecond = sGetElem(stk)->nD;
+				new->nD = degree(sGetElem(stk)->nD, dSecond);
+				sPutElem(stk, new);
+				break;
+			default:
+				pCharIsNum = 0;
+			}
+		}
+	}
+	o->r = stk->head->nD; //результат работы записываем в очередь на вывод
+	free(stk);
+}
+
+
+// Функция для печати массива по правилам задания
+void pVect(float* vector, int size, FILE *output)
 {
 	fprintf(output, "(");
-	for (int i = 0; i < (size - 1); i++) fprintf(output, "%g, ", vect[i]);
-	fprintf(output, "%g)", vect[size - 1]);
-	free(vect);
+	for (int i = 0; i < (size - 1); i++) fprintf(output, "%g, ", vector[i]);
+	fprintf(output, "%g)", vector[size - 1]);
+	free(vector);
 }
 
 
 int main()
 {
-	setlocale(LC_ALL, "Russian"); // Для русских символов ( особенность Visual Studio ), также добавлена соответсвующая библиотека locale.h
-	while (1) // Цикл для постоянного запуска
+	setlocale(LC_ALL, "Russian"); // для русских символов ( особенность Visual Studio )
+
+	while (1) // Постоянный ввод выражения
 	{
-		char choice, op, type; // Переменные для продолжения, операции и типа операндов
-		char nameinput[255]; // Переменная для названия файла
-		char nameoutput[255]; // Переменная для названия файла
-		float Num; // Переменная для числа
+		char choice, op, type;
+		char nameinput[255];
+		char nameoutput[255];
+		float Num;
+
+		printf("Выберите режим работы (p - префиксная нотация, r - обратная польская нотация): ");
+		scanf(" %c", &choice);
 		printf("Введите имя входного файла: ");
 		scanf("%s", &nameinput);
 		printf("Введите имя выходного файла: ");
 		scanf("%s", &nameoutput);
 
-		// Очередь для входных данных
+		//создаём очередь, который будет хранить входные данные для подсчёта
 		queue* tasks = calloc(1, sizeof(queue));
 		FILE* input = fopen(nameinput, "r");
 
-		while (fscanf(input, " %c %c %f", &op, &type, &Num) != EOF) // Построчное чтение файла
+		while (feof(input) == 0) //пока не достигнем конца
 		{
 			queueElem* newT = calloc(1, sizeof(queueElem));
-			newT->op = op;
-			newT->type = type;
-			newT->g = NULL;
-			if (type == 'v')
+			if (choice == 'p')
 			{
-				newT->Size = Num;
-				newT->value1 = malloc(Num * sizeof(float));
-				newT->value2 = malloc(Num * sizeof(float));
-				for (int i = 0; i < Num; i++) fscanf(input, "%f", &newT->value1[i]);
-				for (int i = 0; i < Num; i++) fscanf(input, "%f", &newT->value2[i]);
+				fscanf(input, " %c %c %f", &op, &type, &Num);
+				newT->op = op;
+				newT->type = type;
+				newT->g = NULL;
+				if (type == 'v')
+				{
+					newT->Size = Num;
+					newT->value1 = malloc(Num * sizeof(float));
+					newT->value2 = malloc(Num * sizeof(float));
+					for (int i = 0; i < Num; i++) fscanf(input, "%f", &newT->value1[i]);
+					for (int i = 0; i < Num; i++) fscanf(input, "%f", &newT->value2[i]);
+				}
+				else if (type == 's')
+				{
+					newT->a = Num;
+					if (op != '!') fscanf(input, "%f", &newT->b);
+				}
+				else fgets(nameinput, 100, input); // убираем ненужную строку
 			}
-			else if (type == 's')
+			else if (choice == 'r')
 			{
-				newT->x = Num;
-				if (op != '!') fscanf(input, "%f", &newT->y);
+				newT->g = calloc(255, sizeof(char));
+				fgets(newT->g, 255, input);
 			}
-			else fgets(nameinput, 100, input); // Удаление оставшейся строки
 			putElem(tasks, newT);
 		}
-		fclose(input); // Закрытие файла после чтения
+		fclose(input); // закрытие файла после чтения
 
-		queue* rData = calloc(1, sizeof(queue)); //очередь на печать
-		while (tasks->head != NULL) // Пока не будет конец списка
+		queue* rD = calloc(1, sizeof(queue)); //очередь на печать
+		while (tasks->head != NULL) //пока не достигнем конца списка
 		{
-			queueElem* cT = tasks->head; //берём из очереди элемент для последующей обработки
-			if (tasks->head->type == 'v') CalcforVectors(cT->op, cT);
-			else if (tasks->head->type == 's') Arithm(cT->op, cT);
-			else
+			queueElem* T = tasks->head; 
+			if (choice == 'p')
 			{
-				cT->g = "Неизвестный тип данных!";
+				if (tasks->head->type == 'v') CalcForVectors(T->op, T);
+				else if (tasks->head->type == 's') Arithm(T->op, T);
+				else
+				{	
+					T->g = "Неизвестный тип данных!";
+				}
 			}
-			putElem(rData, cT); // переностка элемента в очередь
+			else if (choice == 'r')
+			{
+				pNotation(T->g, T);
+			}
+			putElem(rD, T); //после обработки переносим элемент в очередь на печать
 			getElem(tasks);
 		}
-		free(tasks);
+		free(tasks); // Освобождение
+
 
 		FILE* output = fopen(nameoutput, "w");
-		while (rData->head != NULL) // Пока не будет конец списка
+		while (rD->head != NULL) // пока не будет конец очереди
 		{
-			queueElem* T = rData->head;
-			if (T->g != NULL)
+			queueElem* cT = rD->head; 
+			if (choice == 'p')
 			{
-				fprintf(output, "%s\n", T->g);
-				getElem(rData);
-				continue;
-			}
+				if (cT->g != NULL)
+				{
+					fprintf(output, "%s\n", cT->g);
+					getElem(rD);
+					continue;
+				}
 
-			if (T->type == 's')
-			{
-				if (T->op != '!') fprintf(output, "%g %c %g = %g", T->x, T->op, T->y, T->r);
-				else fprintf(output, "%g! = %lli", T->x, T->f);
+				if (cT->type == 's')
+				{
+					if (cT->op != '!') fprintf(output, "%g %c %g = %g", cT->a, cT->op, cT->b, cT->r);
+					else fprintf(output, "%g! = %lli", cT->a, cT->f);
+				}
+				else if (cT->type == 'v')
+				{
+					pVect(cT->value1, cT->Size, output);
+					fprintf(output, " %c ", cT->op);
+					pVect(cT->value2, cT->Size, output);
+					fprintf(output, " = ");
+					if (cT->op != '^') pVect(cT->res, cT->Size, output);
+					else fprintf(output, "%g", cT->r);
+				}
+				fprintf(output, "\n");
 			}
-			else if (T->type == 'v')
+			else if (choice == 'r')
 			{
-				ForPrintVect(T->value1, T->Size, output);
-				fprintf(output, " %c ", T->op);
-				ForPrintVect(T->value2, T->Size, output);
-				fprintf(output, " = ");
-				if (T->op != '^') ForPrintVect(T->res, T->Size, output);
-				else fprintf(output, "%g", T->r);
+				fprintf(output, "%g\n", rD->head->r);
 			}
-			fprintf(output, "\n");
-			getElem(rData);
+			getElem(rD);
 		}
-		fclose(output); // закрытие файла
-		printf("Хотите продолжить? (y/n) \n"); // Желает ли пользователь продолжить
+		fclose(output);
+		free(rD);
+		printf("Хотите продолжить? (y/n) \n"); // Предлагаем пользователю продолжить работу
 		scanf(" %c", &choice);
 		if (choice == 'n') break;
-		free(tasks); // Освобождение памяти
 	}
 	return 0;
 }
