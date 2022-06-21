@@ -12,93 +12,42 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
-#include <locale.h>
+#include <locale.h> // Для русских символов в visual studio
 
 
- //структура элементов списка
-typedef struct listElem {
+ //структура элементов очереди
+typedef struct queueElem {
 	long long int f; // Переменная для ответа факториала
 	char* g; // Переменная для сообщения об ошибке или неправильном вводе
 	char op, type; // Переменные для операций и типа операндов
 	float  x, y, r, Size; // Переменные для данных и результата операций
 	float* value1, * value2, * res; // Переменные для чисел и результата векторных операций
-	struct listElem* nextElem;
-} lElem;
+	struct queueElem* nextElem;
+} queueElem;
 
 
-// Для работы со списком
-typedef struct list
+// Для работы с очередью
+typedef struct queue
 {
-	lElem* head;
-	lElem* current;
-} list;
+	queueElem* head;
+	queueElem* end;
+} queue;
 
 
-// Функция для следующего элемента
-lElem* nextElem(list* in_This_List)
+//функция для получения лемента из головы очереди
+queueElem* getElem(queue* from_This_Queue)
 {
-	lElem* next = in_This_List->current->nextElem;
-	in_This_List->current = next;
-	return next;
+	queueElem* ret = from_This_Queue->head;
+	from_This_Queue->head = from_This_Queue->head->nextElem;
+	return ret;
 }
 
-
-int To_Head_Elem(list* in_This_List)
+//функция для добавления нового элемента
+void putElem(queue* to_This_Queue, queueElem* newItem)
 {
-	in_This_List->current = in_This_List->head;
-	return 0;
-}
-
-
-// Функция для того, чтобы добавить новый элемент в списке
-int Applist(list* to_This_List, lElem* newElem)
-{
-	if (to_This_List->head == NULL)
-	{
-		to_This_List->head = newElem;
-		to_This_List->current = newElem;
-		return 0;
-	}
-	to_This_List->current->nextElem = newElem;
-	to_This_List->current = newElem;
-	return 0;
-}
-
-
-// Функция для удаления элемента
-int deleteElem(list* in_This_List)
-{
-	lElem* del = in_This_List->current;
-	if (del == in_This_List->head)
-	{
-		in_This_List->head = del->nextElem;
-		nextElem(in_This_List);
-	}
-	else
-	{
-		To_Head_Elem(in_This_List);
-		while (in_This_List->current->nextElem != del) nextElem(in_This_List);
-		in_This_List->current->nextElem = del->nextElem;
-		if (del->nextElem != NULL) in_This_List->current = del->nextElem;
-	}
-	free(del);
-	return 0;
-}
-
-
-// Функция принимает целое число и возвращает результат его факториала
-long long int fact(int a)
-{
-	if (a == 0) return 1; // Создаем условие, в котором факториал нуля будет = 1
-	else
-	{
-		long long int fact = 1;
-		for (int i = 1; i <= a; i++)
-		{
-			fact *= i;
-		}
-		return fact;
-	}
+	if (to_This_Queue->head == NULL) to_This_Queue->head = newItem;
+	if (to_This_Queue->end != NULL) to_This_Queue->end->nextElem = newItem;
+	to_This_Queue->end = newItem;
 }
 
 
@@ -118,28 +67,42 @@ double degree(float x, float y)
 }
 
 
+// Функция принимает целое число и возвращает результат его факториала
+long long int fact(int a)
+{
+	if (a == 0) return 1; // Создаем условие, в котором факториал нуля будет = 1
+	else
+	{
+		long long int fact = 1;
+		for (int i = 1; i <= a; i++)
+		{
+			fact *= i;
+		}
+		return fact;
+	}
+}
+
+
 // Функция для векторного выражения
-void CalcforVectors(char op, lElem* t)
+void CalcforVectors(char op, queueElem* t)
 {
 	// Проверка на целое число fSize = 1
 	int wSize = t->Size;
 	float fSize = t->Size / wSize;
 	if (fSize != 1) t->g = "Число должно быть целым!";
-
-	int vectorSize = t->Size;
-
-	t->res = calloc(vectorSize, sizeof(float));
+	int vSize = t->Size;
+	t->res = calloc(vSize, sizeof(float));
 	switch (op)
 	{
 	case '+':
-		for (int i = 0; i < vectorSize; i++) t->res[i] = t->value1[i] + t->value2[i];
+		for (int i = 0; i < vSize; i++) t->res[i] = t->value1[i] + t->value2[i];
 		break;
 	case '-':
-		for (int i = 0; i < vectorSize; i++) t->res[i] = t->value1[i] - t->value2[i];
+		for (int i = 0; i < vSize; i++) t->res[i] = t->value1[i] - t->value2[i];
 		break;
 	case '^':
 		t->r = 0;
-		for (int i = 0; i < vectorSize; i++) t->r += t->value1[i] * t->value2[i];
+		for (int i = 0; i < vSize; i++) t->r += t->value1[i] * t->value2[i];
 		break;
 	default:
 		t->g = "Недопустимая операция!";
@@ -149,7 +112,7 @@ void CalcforVectors(char op, lElem* t)
 
 
 // Функция для арифметического выражения
-void Arithm(char op, lElem* t)
+void Arithm(char op, queueElem* t)
 {
 	int wA = t->x;
 	float fA = t->x / wA;
@@ -185,7 +148,7 @@ void Arithm(char op, lElem* t)
 	}
 }
 
-// Функция для того, чтобы печатать массив чисел как сказано в задании
+// Функция для того, чтобы печатать массив чисел как сказано в задании ( используется в векторном выражении )
 void ForPrintVect(float* vect, int size, FILE* output)
 {
 	fprintf(output, "(");
@@ -209,13 +172,13 @@ int main()
 		printf("Введите имя выходного файла: ");
 		scanf("%s", &nameoutput);
 
-		// Список для входных данных
-		list* tasks = calloc(1, sizeof(list));
+		// Очередь для входных данных
+		queue* tasks = calloc(1, sizeof(queue));
 		FILE* input = fopen(nameinput, "r");
 
 		while (fscanf(input, " %c %c %f", &op, &type, &Num) != EOF) // Построчное чтение файла
 		{
-			lElem* newT = calloc(1, sizeof(lElem));
+			queueElem* newT = calloc(1, sizeof(queueElem));
 			newT->op = op;
 			newT->type = type;
 			newT->g = NULL;
@@ -233,34 +196,33 @@ int main()
 				if (op != '!') fscanf(input, "%f", &newT->y);
 			}
 			else fgets(nameinput, 100, input); // Удаление оставшейся строки
-			Applist(tasks, newT);
+			putElem(tasks, newT);
 		}
 		fclose(input); // Закрытие файла после чтения
 
-		To_Head_Elem(tasks);
-
-		while (tasks->current != NULL) // Пока не будет конец списка
+		queue* rData = calloc(1, sizeof(queue)); //очередь на печать
+		while (tasks->head != NULL) // Пока не будет конец списка
 		{
-			if (tasks->current->type == 'v') CalcforVectors(tasks->current->op, tasks->current);
-			else if (tasks->current->type == 's') Arithm(tasks->current->op, tasks->current);
+			queueElem* cT = tasks->head; //берём из очереди элемент для последующей обработки
+			if (tasks->head->type == 'v') CalcforVectors(cT->op, cT);
+			else if (tasks->head->type == 's') Arithm(cT->op, cT);
 			else
 			{
-				tasks->current->g = "Неизвестный тип данных!";
+				cT->g = "Неизвестный тип данных!";
 			}
-			nextElem(tasks);
+			putElem(rData, cT); // переностка элемента в очередь
+			getElem(tasks);
 		}
-
-		To_Head_Elem(tasks);
+		free(tasks);
 
 		FILE* output = fopen(nameoutput, "w");
-
-		while (tasks->current != NULL) // Пока не будет конец списка
+		while (rData->head != NULL) // Пока не будет конец списка
 		{
-			lElem* T = tasks->current;
+			queueElem* T = rData->head;
 			if (T->g != NULL)
 			{
 				fprintf(output, "%s\n", T->g);
-				deleteElem(tasks);
+				getElem(rData);
 				continue;
 			}
 
@@ -279,13 +241,13 @@ int main()
 				else fprintf(output, "%g", T->r);
 			}
 			fprintf(output, "\n");
-			deleteElem(tasks);
+			getElem(rData);
 		}
 		fclose(output); // закрытие файла
-		free(tasks); // Освобождение памяти
 		printf("Хотите продолжить? (y/n) \n"); // Желает ли пользователь продолжить
 		scanf(" %c", &choice);
 		if (choice == 'n') break;
+		free(tasks); // Освобождение памяти
 	}
 	return 0;
 }
