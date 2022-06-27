@@ -55,7 +55,7 @@ queueElem* getElem(queue* from_This_Queue)
 typedef struct stackElem
 {
 	float nD;
-	struct sElem* next;
+	struct stackElem* next;
 } stackElem;
 
 typedef struct stack
