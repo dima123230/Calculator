@@ -22,14 +22,16 @@
     <ClCompile Include="main.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
     </ClCompile>
-    <ClCompile Include="module_list.c" />
+    <ClCompile Include="module_queue.c" />
+    <ClCompile Include="module_stack.c" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="input.txt" />
     <Text Include="output.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="module_list.h" />
+    <ClInclude Include="module_queue.h" />
+    <ClInclude Include="module_stack.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -18,7 +18,10 @@
     <ClCompile Include="main.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="module_list.c">
+    <ClCompile Include="module_queue.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="module_stack.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -31,7 +34,10 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="module_list.h">
+    <ClInclude Include="module_queue.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="module_stack.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
   </ItemGroup>
